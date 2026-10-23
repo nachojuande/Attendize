@@ -1,5 +1,3 @@
-version: '3.2'
-
 services:
   web:
     image: attendize_web:latest
@@ -9,6 +7,8 @@ services:
    # volumes:
    #   - .:/usr/share/nginx/html
    #   - .:/var/www
+    volumes:
+      - ./installed:/usr/share/nginx/html/installed    
     depends_on:
       - db
       - maildev
@@ -25,6 +25,8 @@ services:
    # volumes:
    #   - .:/usr/share/nginx/html
    #   - .:/var/www
+    volumes:
+      - ./installed:/usr/share/nginx/html/installed
   db:
     image: mysql:5.7.23
     restart: always
