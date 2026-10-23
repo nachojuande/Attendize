@@ -1,8 +1,24 @@
 # Multi stage docker file for the Attendize application layer images
 
 # Base image with nginx, php-fpm and composer built on debian
-FROM wyveo/nginx-php-fpm:php74 as base
-RUN apt-get update && apt-get install -y wait-for-it libxrender1
+FROM wyveo/nginx-php-fpm:php74 AS base
+
+# Redirigir Debian Buster a sus repositorios históricos
+RUN sed -i 's|deb.debian.org/debian|archive.debian.org/debian|g' /etc/apt/sources.list \
+    && sed -i 's|security.debian.org/debian-security|archive.debian.org/debian-security|g' /etc/apt/sources.list \
+    && sed -i '/nginx.org/d' /etc/apt/sources.list \
+    && sed -i '/buster-updates/d' /etc/apt/sources.list \
+    && echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99archive
+
+# RUN apt-get update && apt-get install -y wait-for-it libxrender1
+
+RUN mkdir -p /tmp/apt-sources-disabled \
+    && find /etc/apt/sources.list.d/ -maxdepth 1 -type f \
+       \( -name "*.list" -o -name "*.sources" \) \
+       -exec mv -t /tmp/apt-sources-disabled/ {} + \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends wait-for-it libxrender1 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set up code
 WORKDIR /usr/share/nginx/html
